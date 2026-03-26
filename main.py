@@ -74,6 +74,7 @@ import asyncio
 import base64
 import cv2
 import numpy as np
+from routes import emergency_alert
 
 from routes import traffic, emergency, video
 from services.runner import traffic_loop
@@ -95,7 +96,7 @@ app.add_middleware(
 app.include_router(traffic.router)
 app.include_router(emergency.router)
 app.include_router(video.router)
-
+app.include_router(emergency_alert.router)
 
 class ImageData(BaseModel):
     image: str
