@@ -101,24 +101,45 @@ class ImageData(BaseModel):
     image: str
 
 
+# @app.post("/detect")
+# async def detect(data: ImageData):
+#     try:
+#         image_data = data.image.split(",")[1]
+#         img_bytes = base64.b64decode(image_data)
+
+#         np_arr = np.frombuffer(img_bytes, np.uint8)
+#         frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+
+#         if frame is None:
+#             return {"error": "Invalid image data"}
+
+#         result = detect_vehicles(frame)
+#         return result
+
+#     except Exception as e:
+#         return {"error": str(e)}
+
 @app.post("/detect")
 async def detect(data: ImageData):
     try:
-        image_data = data.image.split(",")[1]
+        if not data.image or "," not in data.image:
+            return {"count": 0, "boxes": [], "error": "Invalid image data"}
+
+        image_data = data.image.split(",", 1)[1]
         img_bytes = base64.b64decode(image_data)
 
         np_arr = np.frombuffer(img_bytes, np.uint8)
         frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
 
         if frame is None:
-            return {"error": "Invalid image data"}
+            return {"count": 0, "boxes": [], "error": "Could not decode image"}
 
         result = detect_vehicles(frame)
         return result
 
     except Exception as e:
-        return {"error": str(e)}
-
+        print("Detect route error:", e)
+        return {"count": 0, "boxes": [], "error": str(e)}
 
 @app.on_event("startup")
 async def start_background_tasks():
